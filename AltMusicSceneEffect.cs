@@ -843,7 +843,7 @@ namespace TerryMusicMod
 
     class TrojanSquirrel : MusicEffect
     {
-        public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
+        public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "HoloCureSuspect";
         public override bool Active(Player player)
         {
