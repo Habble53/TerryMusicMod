@@ -61,7 +61,7 @@ namespace TerryMusicMod
             return (rectangle.Intersects(value));
         }
 
-        public static bool AnyPillarsInRange()
+        public static NPC FirstPillarInRange()
         {
             int[] pillarTypes = [
                 NPCID.LunarTowerSolar,
@@ -69,7 +69,7 @@ namespace TerryMusicMod
                 NPCID.LunarTowerNebula,
                 NPCID.LunarTowerStardust,
             ];
-            return Main.npc.Any(npc => npc.active && pillarTypes.Contains(npc.type) && BossMusicRange(npc));
+            return Main.npc.FirstOrDefault(npc => npc.active && pillarTypes.Contains(npc.type) && BossMusicRange(npc), null);
         }
 
     }
@@ -837,779 +837,373 @@ namespace TerryMusicMod
         {
             return Active(player);
         }
-        public abstract bool Active(Player player);
+        public override float GetWeight(Player player) => 0.51f;
+        public abstract bool MyMusicConfig { get; }
+        public abstract NPC TryGetActiveNPC { get; }
+        public abstract string DisplayMusicName { get; }
+        public virtual bool Active(Player player)
+        {
+            if (!MyMusicConfig)
+                return false;
+            NPC npc = TryGetActiveNPC;
+            if (npc != null)
+                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
+            if (timer > 0)
+            {
+                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
+                    timer--;
+                TerryMusicSystem.nowPlayingString = DisplayMusicName;
+                return true;
+            }
+            return false;
+        }
     }
     #region Bosses
+
 
     class TrojanSquirrel : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "HoloCureSuspect";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideTrojanSquirrelTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("TrojanSquirrel");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "HoloCure ~ Suspect";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideTrojanSquirrelTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("TrojanSquirrel");
+        public override string DisplayMusicName => "HoloCure ~ Suspect";
     }
+
     class KingSlime : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "rePrologue";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideKingSlimeTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.KingSlime);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Sakuzyo ~ rePrologue";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideKingSlimeTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.KingSlime);
+        public override string DisplayMusicName => "Sakuzyo ~ rePrologue";
     }
+
     class EyeOfCthulhu : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "XNautFortress";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideEyeOfCthulhuTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.EyeofCthulhu);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Paper Mario The Thousand Year Door ~ X-Naut Fortress";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideEyeOfCthulhuTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.EyeofCthulhu);
+        public override string DisplayMusicName => "Paper Mario TTYD ~ X-Naut Fortress";
     }
+
     class CursedCoffin : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "ShiftingSandLand";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideCursedCoffinTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("CursedCoffin");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Super Mario 64 ~ Shifting Sand Land";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideCursedCoffinTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("CursedCoffin");
+        public override string DisplayMusicName => "Super Mario 64 ~ Shifting Sand Land";
     }
+
     class EaterOfWorlds : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "LastBattleBallosMix";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideEaterOfWorldsTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.EaterofWorldsHead);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "DM Dokuro ~ Last Battle (Ballos Mix)";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideEaterOfWorldsTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.EaterofWorldsHead);
+        public override string DisplayMusicName => "DM Dokuro ~ Last Battle (Ballos Mix)";
     }
+
     class Brain : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "MotherBrain";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideBrainOfCthulhuTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.BrainofCthulhu);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Super Metroid ~ Mother Brain";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideBrainOfCthulhuTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.BrainofCthulhu);
+        public override string DisplayMusicName => "Super Metroid ~ Mother Brain";
     }
+
     class QueenBee : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "RegnumCaelorumEtGehennaVerumCurNonAudimus";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideQueenBeeTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.QueenBee);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Regnum Caelorum Et Gehenna ~ Verum Cur Non Audimus";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideQueenBeeTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.QueenBee);
+        public override string DisplayMusicName => "Regnum Caelorum Et Gehenna ~ Verum Cur Non Audimus";
     }
+
     class Skeletron : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "BadToTheBone";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideSkeletronTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.SkeletronHead);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "George Thorogood & The Destroyers ~ Bad to the Bone";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideSkeletronTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.SkeletronHead);
+        public override string DisplayMusicName => "George Thorogood ~ Bad to the Bone";
     }
+
     class Deerclops : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "NoHesitation";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideDeerclopsTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.Deerclops);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Jujutsu Kaisen ~ No Hesitation (Abridged)";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideDeerclopsTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.Deerclops);
+        public override string DisplayMusicName => "Jujutsu Kaisen ~ No Hesitation (Abridged)";
     }
+
     class Devi : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
         public override string MusicName => "UsagiFlap";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideDevianttTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("DeviBoss");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ Usagi Flap";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideDevianttTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("DeviBoss");
+        public override string DisplayMusicName => "Blue Archive ~ Usagi Flap";
     }
+
     class WallOfFlesh : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "DemetoriNecrofantasia";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideWallOfFleshTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.WallofFlesh);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Demetori ~ Necrofantasia";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideWallOfFleshTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.WallofFlesh);
+        public override string DisplayMusicName => "Demetori ~ Necrofantasia";
     }
+
     class Dreadnautilus : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "BloodStainedFaith";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideDreadnautilusTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.BloodNautilus);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ Blood Stained Faith";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideDreadnautilusTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.BloodNautilus);
+        public override string DisplayMusicName => "Blue Archive ~ Blood Stained Faith";
     }
+
     class QueenSlime : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "DededeDrumDashDeluxeCROWNED";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideQueenSlimeTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.QueenSlimeBoss);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Dedede's Drum Dash Deluxe ~ C-R-O-W-N-E-D";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideQueenSlimeTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.QueenSlimeBoss);
+        public override string DisplayMusicName => "Dedede's Drum Dash Deluxe ~ C-R-O-W-N-E-D";
     }
+
     class Baron : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "BREISXVsZeroDecisiveBattle2";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideBanishedBaronTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("BanishedBaron");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "BREIS ~ X Vs Zero Decisive Battle 2";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideBanishedBaronTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("BanishedBaron");
+        public override string DisplayMusicName => "BREIS ~ X Vs Zero Decisive Battle 2";
     }
+
     class SkeletronPrime : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "PACHAD";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideSkeletronPrimeTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.SkeletronPrime);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ PACHAD";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideSkeletronPrimeTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.SkeletronPrime);
+        public override string DisplayMusicName => "Blue Archive ~ PACHAD";
     }
+
     class Twins : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "SoundAveStormRider";
-        public override bool Active(Player player)
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideTwinsTheme;
+        public override NPC TryGetActiveNPC
         {
-            if (!MusicConfig.Instance.OverrideTwinsTheme)
-                return false;
-            NPC reti = MusicUtils.FindClosestBoss(NPCID.Retinazer);
-            NPC spaz = MusicUtils.FindClosestBoss(NPCID.Spazmatism);
-            if (reti != null || spaz != null)
+            get
             {
-                TerryMusicSystem.nowPlayingString = "Sound Ave ~ Storm Rider";
-                return true;
+                var reti = MusicUtils.FindClosestBoss(NPCID.Retinazer);
+                var spaz = MusicUtils.FindClosestBoss(NPCID.Spazmatism);
+                return reti ?? spaz;
             }
-            return false;
         }
+        public override string DisplayMusicName => "Sound Ave ~ Storm Rider";
     }
+
     class Destroyer : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "DiverseSystemNightmareParadiseAbridged";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideDestroyerTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.TheDestroyer);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Diverse System ~ Nightmare Paradise (Abridged)";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideDestroyerTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.TheDestroyer);
+        public override string DisplayMusicName => "Diverse System ~ Nightmare Paradise (Abridged)";
     }
+
     class Lifelight : MusicEffect
     {
-        public override string MusicName => "SEQUELcolonyKizuato";
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
-        public override bool Active(Player player)
-        {
-            if (MusicUtils.Souls == null || !MusicConfig.Instance.OverrideLifelightTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss(MusicUtils.Souls.Version >= Version.Parse("1.8") ? "Lifelight" : "LifeChallenger");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "SEQUEL colony ~ Kizuato";
-                return true;
-            }
-            return false;
-        }
+        public override string MusicName => "SEQUELcolonyKizuato";
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideLifelightTheme && MusicUtils.Souls != null;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss(
+            MusicUtils.Souls.Version >= Version.Parse("1.8") ? "Lifelight" : "LifeChallenger");
+        public override string DisplayMusicName => "SEQUEL colony ~ Kizuato";
     }
+
     class Plantera : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "Gekkasakuya";
-
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverridePlanteraTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.Plantera);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Magia Record ~ Gekkasakuya";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverridePlanteraTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.Plantera);
+        public override string DisplayMusicName => "Magia Record ~ Gekkasakuya";
     }
+
     class Golem : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "MEGALOVANIA";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideGolemTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.Golem);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "UNDERTALE ~ MEGALOVANIA";
-                return true;
-            }
-            return false;
-
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideGolemTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.Golem);
+        public override string DisplayMusicName => "UNDERTALE ~ MEGALOVANIA";
     }
+
     class Betsy : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "BetterCallSaul";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideBetsyTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.DD2Betsy);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Better Call Saul ~ Intro";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideBetsyTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.DD2Betsy);
+        public override string DisplayMusicName => "Better Call Saul ~ Intro";
     }
+
     class Fishron : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "CannonBallMythos";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideDukeFishronTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.DukeFishron);
-            if (npc != null && npc.active)
-            {
-                TerryMusicSystem.nowPlayingString = "Megaman Zero ~ Cannon Ball (Mythos)";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideDukeFishronTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.DukeFishron);
+        public override string DisplayMusicName => "Megaman Zero ~ Cannon Ball (Mythos)";
     }
+
     class EmpressofLight : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "BorderOfLifeResurrectionButterfly";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideEmpressOfLightTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.HallowBoss);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Touhou Perfect Cherry Blossom ~ Border of Life / Resurrection Butterfly";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideEmpressOfLightTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.HallowBoss);
+        public override string DisplayMusicName => "Touhou PCB ~ Border of Life / Resurrection Butterfly";
     }
+
     class Cultist : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossLow;
         public override string MusicName => "Chokmah232";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideLunaticCultistTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.CultistBoss);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ OST 232 (Chokmah)";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideLunaticCultistTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.CultistBoss);
+        public override string DisplayMusicName => "Blue Archive ~ The Eruption";
     }
+
     class Pillars : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "OurOath";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideLunarPillarsTheme)
-                return false;
-            if (MusicUtils.AnyPillarsInRange())
-            {
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ Our Oath";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideLunarPillarsTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FirstPillarInRange();
+        public override string DisplayMusicName => "Blue Archive ~ Our Oath";
     }
+
     class MoonLord : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
         public override string MusicName => "FuryOfSet";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideMoonLordTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestBoss(NPCID.MoonLordCore);
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Blue Archive ~ FURY OF SET";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideMoonLordTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestBoss(NPCID.MoonLordCore);
+        public override string DisplayMusicName => "Blue Archive ~ FURY OF SET";
     }
+
     class TimberChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "StardustSong";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideTimberChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("TimberChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "HoloCure ~ Stardust Song";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideTimberChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("TimberChampion");
+        public override string DisplayMusicName => "HoloCure ~ Stardust Song";
     }
+
     class TerraChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "AriaLastBattle";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideTerraChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("TerraChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Castlevania Aria of Sorrow ~ Last Battle";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideTerraChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("TerraChampion");
+        public override string DisplayMusicName => "Castlevania Aria of Sorrow ~ Last Battle";
     }
+
     class NatureChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "MasahiroAokiFrostbite";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideNatureChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("NatureChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Masahiro Aoki ~ Frostbite";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideNatureChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("NatureChampion");
+        public override string DisplayMusicName => "Masahiro Aoki ~ Frostbite";
     }
+
     class LifeChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "conciliation";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideLifeChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("LifeChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "BlazBlue ~ conciliation";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideLifeChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("LifeChampion");
+        public override string DisplayMusicName => "BlazBlue ~ conciliation";
     }
+
     class ShadowChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "ProteusRidley3";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideShadowChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("ShadowChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Metroid Samus Returns ~ Proteus Ridley 3";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideShadowChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("ShadowChampion");
+        public override string DisplayMusicName => "Metroid Samus Returns ~ Proteus Ridley 3";
     }
+
     class EarthChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "Pompey";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideEarthChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("EarthChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Zenless Zone Zero ~ Pompey";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideEarthChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("EarthChampion");
+        public override string DisplayMusicName => "Zenless Zone Zero ~ Pompey";
     }
+
     class SpiritChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "SketchesOfPain";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideSpiritChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("SpiritChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "The Binding of Isaac ~ Sketches of Pain";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideSpiritChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("SpiritChampion");
+        public override string DisplayMusicName => "The Binding of Isaac ~ Sketches of Pain";
     }
+
     class WillChampion : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
         public override string MusicName => "MamoruKunHasBeenCursedWillForce";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideWillChampionTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("WillChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Mamoru-kun Wa Norowarete Shimatta! ~ Will Force";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideWillChampionTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("WillChampion");
+        public override string DisplayMusicName => "Mamoru-kun Wa Norowarete Shimatta! ~ Will Force";
     }
+
     class Eridanus : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
         public override string MusicName => "SuddenDeath";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideEridanusTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("CosmosChampion");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Rabi-Ribi ~ Sudden Death";
-                return true;
-            }
-            return false;
-
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideEridanusTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("CosmosChampion");
+        public override string DisplayMusicName => "Rabi-Ribi ~ Sudden Death";
     }
+
     class Abom : MusicEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
         public override string MusicName => "Showdown";
-        public override bool Active(Player player)
-        {
-            if (!MusicConfig.Instance.OverrideAbominationnTheme)
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("AbomBoss");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = "Project Wingman ~ Showdown";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => MusicConfig.Instance.OverrideAbominationnTheme;
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("AbomBoss");
+        public override string DisplayMusicName => "Project Wingman ~ Showdown";
     }
+
     class Mutant : MusicEffect
     {
         public override SceneEffectPriority Priority => (SceneEffectPriority)9;
-        private bool useAltMusic => MusicConfig.Instance.MutantFtwZzz && 
+        private bool useAltMusic => MusicConfig.Instance.MutantFtwZzz &&
             (MusicUtils.Souls.Version >= Version.Parse("1.8") ? (bool)MusicUtils.Souls.Call("MasochistMode") : Main.getGoodWorld);
         public override string MusicName => useAltMusic ? "BattleTrialsGlory" : "SupremeRulersCoronationOVERLORD";
-        public override bool Active(Player player)
-        {
-            if ((MusicUtils.Souls == null) || (!MusicConfig.Instance.OverrideMutantTheme && !useAltMusic))
-                return false;
-            NPC npc = MusicUtils.FindClosestSoulsBoss("MutantBoss");
-            if (npc != null)
-                timer = MusicConfig.Instance.ImmersiveBossSongs ? MusicEffect.IMMERSIVE_SONG_TIME : 6;
-            if (timer > 0)
-            {
-                if (!MusicConfig.Instance.ImmersiveBossSongs || (npc == null && !(Main.LocalPlayer.active && Main.LocalPlayer.dead)))
-                    timer--;
-                TerryMusicSystem.nowPlayingString = useAltMusic ? "Zenless Zone Zero ~ Battle Trials (Glory)" : "Kirby's Return to Dream Land Deluxe ~ Supreme Ruler's Coronation - OVERLORD";
-                return true;
-            }
-            return false;
-        }
+        public override bool MyMusicConfig => (MusicUtils.Souls != null) && (MusicConfig.Instance.OverrideMutantTheme || useAltMusic);
+        public override NPC TryGetActiveNPC => MusicUtils.FindClosestSoulsBoss("MutantBoss");
+        public override string DisplayMusicName =>
+            useAltMusic ? "Zenless Zone Zero ~ Battle Trials (Glory)" : "Kirby RTDL Deluxe ~ Supreme Ruler's Coronation - OVERLORD";
     }
     #endregion
 }
